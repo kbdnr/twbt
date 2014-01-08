@@ -6,13 +6,18 @@ from PIL import Image
 from StringIO import StringIO
 import twitter
 import sys
-import os
+from os import remove
+import random
+from time import sleep
 
 input = raw_input
 
 #Retrieve random word!
 r = requests.get('http://randomword.setgetgo.com/get.php')
 word = r.text
+
+#Display random word
+print(word)
 
 #Google image search word
 r = requests.get('https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=' + r.text)
@@ -22,11 +27,12 @@ data = results['responseData']
 dataInfo = data['results']
 
 #Download 3rd result
+rando = random.randint(1,4)
 rescount = 0
 savename = ''
 for myUrl in dataInfo:
   rescount += 1
-  if(rescount == 3):
+  if(rescount == rando):
     savename = myUrl['unescapedUrl'].rsplit('/',1)[1]
     rImage = requests.get(myUrl['unescapedUrl'])
     i = Image.open(StringIO(rImage.content))
@@ -44,5 +50,8 @@ tweeet = twitter.Api(consumer_key=oauthInfo[1],
 #Tweet Media
 tweeet.PostMedia('random word: ' + word,savename)
 
+#hold your horses... wait for the upload
+sleep(2)
+
 #Deletes files to keep folder clean
-os.remove(savename)
+remove(savename)
